@@ -17,7 +17,7 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 class PeakController extends AbstractController
 {
     /**
-     * @Route("/api/peak/new", methods={"PUT"})
+     * @Route("/api/peak/create", methods={"PUT"})
      * @SWG\Parameter(name="name", in="formData", type="string", description="The name of the new peak", required=true)
      * @SWG\Parameter(name="lat", in="formData", type="number", description="The latitude of the new peak", required=true)
      * @SWG\Parameter(name="lon", in="formData", type="number", description="The longitude of the new peak", required=true)
@@ -49,7 +49,7 @@ class PeakController extends AbstractController
     }
     
     /**
-     * @Route("/api/peak/{id}", methods={"GET"})
+     * @Route("/api/peak/read/{id}", methods={"GET"})
      * @SWG\Parameter(name="id", in="path", type="integer", description="The id of the requested peak", required=true)
      * @SWG\Response(response=200, @Model(type=Peak::class), description="The requested peak")
      * @SWG\Response(response=404, description="Peak not found")
@@ -67,7 +67,7 @@ class PeakController extends AbstractController
     }
     
     /**
-     * @Route("/api/peak/{id}", methods={"POST"})
+     * @Route("/api/peak/get/{id}", methods={"POST"})
      * @SWG\Parameter(name="id", in="path", type="integer", description="The id of the requested peak", required=true)
      * @SWG\Parameter(name="name", in="formData", type="string", description="The new name of the peak")
      * @SWG\Parameter(name="lat", in="formData", type="number", description="The new latitude of the peak")
@@ -102,7 +102,7 @@ class PeakController extends AbstractController
     }
     
     /**
-     * @Route("/api/peak/{id}", methods={"DELETE"})
+     * @Route("/api/peak/delete/{id}", methods={"DELETE"})
      * @SWG\Parameter(name="id", in="path", type="integer", description="The id of the requested peak", required=true)
      * @SWG\Response(response=200, description="Peak successfully deleted")
      * @SWG\Response(response=404, description="Peak not found")
@@ -116,5 +116,30 @@ class PeakController extends AbstractController
         $entityManager->remove($peak);
         $entityManager->flush();
         return new Response();
+    }
+
+    /**
+     * @Route("/api/peak/get-in-zone", methods={"GET"})
+     * @SWG\Parameter(name="n", in="query", type="number", description="The northbound latitude of the boundary box", required=true)
+     * @SWG\Parameter(name="w", in="query", type="number", description="The westbound longitude of the boundary box", required=true)
+     * @SWG\Parameter(name="s", in="query", type="number", description="The southbound latitude of the boundary box", required=true)
+     * @SWG\Parameter(name="e", in="query", type="number", description="The eastbound longitude of the boundary box", required=true)
+     * @SWG\Response(response=200, @SWG\Schema(type="array", @SWG\Items(ref=@Model(type=Peak::class))),
+     *               description="The peaks inside the boundary box")
+     */
+    public function getPeaksInZone(Request $request) {
+        $northboundLat = (float) $request->query->get("n");
+        $westboundLon = (float) $request->query->get("w");
+        $southboundLat = (float) $request->query->get("s");
+        $eastboundLon = (float) $request->query->get("e");
+
+        $peaks = $this->getDoctrine()->getRepository(Peak::class)
+            ->findByBoundaryBox($northboundLat, $westboundLon, $southboundLat, $eastboundLon);
+
+        $encoders = array(new JsonEncoder());
+        $normalizers = array(new ObjectNormalizer());
+        $serializer = new Serializer($normalizers, $encoders);
+        $peaksSerialized = $serializer->serialize($peaks, 'json');
+        return new Response($peaksSerialized);
     }
 }

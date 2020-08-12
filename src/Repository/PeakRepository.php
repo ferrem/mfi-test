@@ -47,4 +47,19 @@ class PeakRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function findByBoundaryBox($nLat, $wLon, $sLat, $eLon)
+    {
+        return $this->createQueryBuilder('p')
+            ->andWhere('p.lat <= :nlat')
+            ->andWhere('p.lat >= :slat')
+            ->andWhere('p.lon <= :elon')
+            ->andWhere('p.lon >= :wlon')
+            ->setParameter('nlat', $nLat)
+            ->setParameter('slat', $sLat)
+            ->setParameter('elon', $eLon)
+            ->setParameter('wlon', $wLon)
+            ->getQuery()
+            ->getResult();
+    }
 }
