@@ -14,16 +14,10 @@ services:
 
     php:
         build: docker/php
-        restart: always
         volumes:
             - .:/app
-
-    composer:
-        image: composer
-        restart: 'no'
-        command: install
-        volumes:
-            - .:/app
+        depends_on: 
+            - database
 
     database:
         image: postgres:12
