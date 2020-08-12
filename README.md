@@ -6,11 +6,15 @@
 
 ## Installation
 
-```git clone https://github.com/ferrem/mfi-test.git```
+```
+git clone https://github.com/ferrem/mfi-test.git
+cd mfi-test
+docker-compose up
+```
 
-```cd mfi-test```
+Attendre que le terminal affiche `mfi-test_composer_1 exited with code 0/1`
 
-```docker-compose up```
+La documentation de l'API est accessible sur `http://localhost:8000/api/doc`
 
 ## Tâches réalisées
 
