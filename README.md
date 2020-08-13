@@ -12,7 +12,7 @@ cd mfi-test
 docker-compose up
 ```
 
-Attendre que le terminal affiche `mfi-test_composer_1 exited with code 0/1`
+Attendre que le terminal affiche `fpm is running`
 
 La documentation de l'API est accessible sur `http://localhost:8000/api/doc`
 
